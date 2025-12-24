@@ -14,6 +14,13 @@ export enum CaseType {
   INTERCASTE_MARRIAGE = 'Inter-caste Marriage Incentive'
 }
 
+export interface VerificationResult {
+  isVerified: boolean;
+  score: number;
+  remarks: string;
+  matchedFields: string[];
+}
+
 export interface Beneficiary {
   id: string;
   name: string;
@@ -27,6 +34,7 @@ export interface Beneficiary {
   bankAccount: string;
   ifsc: string;
   statement?: string;
+  aiVerification?: VerificationResult;
 }
 
 export interface Grievance {
@@ -36,11 +44,4 @@ export interface Grievance {
   description: string;
   status: 'Open' | 'In-Progress' | 'Resolved' | 'Escalated';
   createdAt: string;
-}
-
-export interface VerificationResult {
-  isVerified: boolean;
-  score: number;
-  remarks: string;
-  matchedFields: string[];
 }

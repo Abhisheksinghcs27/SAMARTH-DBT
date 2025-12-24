@@ -9,9 +9,50 @@ import GrievanceRedressal from './components/GrievanceRedressal';
 import { Beneficiary, ApplicationStatus, CaseType } from './types';
 
 const INITIAL_APPS: Beneficiary[] = [
-  { id: 'BT-101', name: 'Rajesh Kumar', aadhaar: '456789012345', phone: '9876543210', caseType: CaseType.POA_ACT, status: ApplicationStatus.PENDING, amount: 82500, appliedDate: '2024-05-12', bankAccount: '3045678912', ifsc: 'SBIN0001', firNumber: 'FIR/2024/22', statement: 'Physical assault and denial of access to community water source by members of local dominant community.' },
-  { id: 'BT-102', name: 'Sunita Meena', aadhaar: '112233445566', phone: '9123456789', caseType: CaseType.INTERCASTE_MARRIAGE, status: ApplicationStatus.PENDING, amount: 250000, appliedDate: '2024-05-14', bankAccount: '9988776655', ifsc: 'HDFC0001', firNumber: '', statement: 'Applying for incentive grant following legal marriage ceremony on 10th March 2024.' },
-  { id: 'BT-103', name: 'Anil Paswan', aadhaar: '778899001122', phone: '8877665544', caseType: CaseType.POA_ACT, status: ApplicationStatus.DISBURSED, amount: 120000, appliedDate: '2024-04-20', bankAccount: '1122334455', ifsc: 'ICIC0001', firNumber: 'FIR/2024/09' },
+  { 
+    id: 'BT-101', 
+    name: 'Rajesh Kumar', 
+    aadhaar: '456789012345', 
+    phone: '9876543210', 
+    caseType: CaseType.POA_ACT, 
+    status: ApplicationStatus.PENDING, 
+    amount: 82500, 
+    appliedDate: '2024-05-12', 
+    bankAccount: '3045678912', 
+    ifsc: 'SBIN0001', 
+    firNumber: 'FIR/2024/22', 
+    statement: 'Physical assault and denial of access to community water source by members of local dominant community.',
+    aiVerification: { isVerified: true, score: 94, remarks: "High semantic alignment with CCTNS FIR narrative.", matchedFields: ["Identity", "Incident Date", "Statute Section"] }
+  },
+  { 
+    id: 'BT-102', 
+    name: 'Sunita Meena', 
+    aadhaar: '112233445566', 
+    phone: '9123456789', 
+    caseType: CaseType.INTERCASTE_MARRIAGE, 
+    status: ApplicationStatus.PENDING, 
+    amount: 250000, 
+    appliedDate: '2024-05-14', 
+    bankAccount: '9988776655', 
+    ifsc: 'HDFC0001', 
+    firNumber: '', 
+    statement: 'Applying for incentive grant following legal marriage ceremony on 10th March 2024.',
+    aiVerification: { isVerified: true, score: 88, remarks: "Marriage certificate records verified against municipal database.", matchedFields: ["Spouse Aadhaar", "Date of Marriage"] }
+  },
+  { 
+    id: 'BT-103', 
+    name: 'Anil Paswan', 
+    aadhaar: '778899001122', 
+    phone: '8877665544', 
+    caseType: CaseType.POA_ACT, 
+    status: ApplicationStatus.DISBURSED, 
+    amount: 120000, 
+    appliedDate: '2024-04-20', 
+    bankAccount: '1122334455', 
+    ifsc: 'ICIC0001', 
+    firNumber: 'FIR/2024/09',
+    aiVerification: { isVerified: false, score: 42, remarks: "Flagged: Semantic mismatch between FIR sections and victim narrative.", matchedFields: ["Identity"] }
+  },
 ];
 
 const App: React.FC = () => {
@@ -22,7 +63,6 @@ const App: React.FC = () => {
   const [isGlobalLoading, setIsGlobalLoading] = useState(true);
 
   useEffect(() => {
-    // Simulated initial boot
     const timer = setTimeout(() => setIsGlobalLoading(false), 1200);
     return () => clearTimeout(timer);
   }, []);
@@ -73,8 +113,6 @@ const App: React.FC = () => {
       />
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-12">
-        
-        {/* Toast System */}
         <div className="fixed top-24 right-6 z-[100] flex flex-col gap-4">
           {notifications.map((n) => (
             <div key={n.id} className="bg-slate-900/95 backdrop-blur-xl text-white px-8 py-5 rounded-3xl shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] animate-slideInRight flex items-center gap-5 border border-slate-700/50 max-w-sm">

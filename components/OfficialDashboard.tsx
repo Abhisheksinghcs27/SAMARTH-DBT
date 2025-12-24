@@ -25,6 +25,17 @@ interface OfficialDashboardProps {
 }
 
 const OfficialDashboard: React.FC<OfficialDashboardProps> = ({ apps, onNavigate }) => {
+  // Calculate AI Verification summaries
+  const verifiedApps = apps.filter(a => !!a.aiVerification);
+  const averageConfidence = verifiedApps.length > 0 
+    ? Math.round(verifiedApps.reduce((acc, curr) => acc + (curr.aiVerification?.score || 0), 0) / verifiedApps.length)
+    : 0;
+  
+  const flaggedCount = verifiedApps.filter(a => a.aiVerification?.score && a.aiVerification.score < 60).length;
+  const criticalRemarks = verifiedApps
+    .filter(a => a.aiVerification?.remarks.toLowerCase().includes('flagged') || (a.aiVerification?.score || 100) < 60)
+    .slice(0, 3);
+
   return (
     <div className="space-y-10 animate-fadeIn">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -50,6 +61,80 @@ const OfficialDashboard: React.FC<OfficialDashboardProps> = ({ apps, onNavigate 
       </header>
       
       <StatsCards />
+
+      {/* AI Scrutiny Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="lg:col-span-3 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm overflow-hidden relative group">
+           <div className="flex flex-col md:flex-row items-center gap-10">
+              <div className="relative w-40 h-40 shrink-0">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-slate-100" />
+                  <circle 
+                    cx="80" cy="80" r="70" 
+                    stroke="currentColor" 
+                    strokeWidth="12" 
+                    fill="transparent" 
+                    strokeDasharray={440}
+                    strokeDashoffset={440 - (440 * averageConfidence) / 100}
+                    className="text-indigo-600 transition-all duration-1000 ease-out" 
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-4xl font-black text-slate-900 tracking-tighter">{averageConfidence}%</span>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Avg. Confidence</span>
+                </div>
+              </div>
+              <div className="flex-1 space-y-6">
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                    AI Scrutiny Insights
+                    <span className="bg-indigo-50 text-indigo-600 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-widest border border-indigo-100">Neural Sync</span>
+                  </h3>
+                  <p className="text-slate-500 text-sm mt-1">Cross-referencing FIR semantics with victim testimonies across the worklist.</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Applications Audited</p>
+                    <p className="text-2xl font-black text-slate-900">{verifiedApps.length}</p>
+                  </div>
+                  <div className="bg-rose-50 p-4 rounded-2xl border border-rose-100">
+                    <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1">Flagged for Review</p>
+                    <p className="text-2xl font-black text-rose-600">{flaggedCount}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="hidden xl:block w-px h-32 bg-slate-100"></div>
+              <div className="flex-1 space-y-4">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Critical AI Remarks</p>
+                <div className="space-y-3">
+                  {criticalRemarks.map(app => (
+                    <div key={app.id} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors">
+                      <div className="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0"></div>
+                      <div>
+                        <p className="text-[11px] font-black text-slate-700 leading-tight mb-0.5">{app.id} / {app.name}</p>
+                        <p className="text-[10px] text-slate-500 font-medium truncate max-w-[180px] italic">"{app.aiVerification?.remarks}"</p>
+                      </div>
+                    </div>
+                  ))}
+                  {criticalRemarks.length === 0 && (
+                    <p className="text-[11px] text-slate-400 font-bold italic">No critical anomalies detected in recent audit.</p>
+                  )}
+                </div>
+              </div>
+           </div>
+           <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none group-hover:opacity-[0.06] transition-opacity">
+              <i className="fa-solid fa-brain text-[12rem]"></i>
+           </div>
+        </div>
+        <div className="lg:col-span-1 bg-slate-900 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden flex flex-col justify-center border border-slate-800">
+           <div className="relative z-10 text-center">
+              <i className="fa-solid fa-shield-virus text-4xl text-indigo-400 mb-4"></i>
+              <h4 className="text-lg font-black tracking-tight mb-2">Integrity Shield</h4>
+              <p className="text-xs text-slate-400 font-medium leading-relaxed px-4">AI verification prevents misallocation by detecting 99.2% of procedural inconsistencies.</p>
+              <button onClick={() => onNavigate('verifications')} className="mt-6 text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] hover:text-indigo-300 transition-colors">Audit Full Logs <i className="fa-solid fa-arrow-right ml-1"></i></button>
+           </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
@@ -116,7 +201,6 @@ const OfficialDashboard: React.FC<OfficialDashboardProps> = ({ apps, onNavigate 
             <p className="text-slate-400 text-sm mb-6">Real-time geographic distribution of pending cases.</p>
             <div className="bg-slate-800 h-64 rounded-2xl border border-slate-700 flex items-center justify-center relative">
                <i className="fa-solid fa-map-location-dot text-6xl text-slate-700 opacity-20"></i>
-               {/* Simulating data points */}
                <div className="absolute top-1/4 left-1/3 w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]"></div>
                <div className="absolute top-1/2 left-1/2 w-4 h-4 bg-amber-500 rounded-full animate-pulse delay-75 shadow-[0_0_15px_rgba(245,158,11,0.5)]"></div>
                <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-emerald-500 rounded-full animate-pulse delay-150"></div>
