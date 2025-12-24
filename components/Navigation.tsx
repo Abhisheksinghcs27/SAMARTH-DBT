@@ -28,7 +28,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange, userRol
               <i className="fa-solid fa-scale-balanced text-white text-lg"></i>
             </div>
             <div>
-              <span className="font-black text-xl tracking-tight text-slate-900 block leading-none">JUSTICESTREAM</span>
+              <span className="font-black text-xl tracking-tight text-slate-900 block leading-none">SAMARTH</span>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">Gov of India Portal</span>
             </div>
           </div>
