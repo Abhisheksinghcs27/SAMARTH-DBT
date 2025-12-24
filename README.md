@@ -5,6 +5,57 @@ SAMARTH is a high-tech, end-to-end digital ecosystem designed to revolutionize t
 ## 🚀 The Challenge
 Historically, the disbursement of monetary relief to victims of atrocities and incentives for inter-caste marriages has been manual, time-consuming, and prone to procedural delays. SAMARTH addresses these challenges by replacing manual verification with an automated, AI-driven, and transparent system.
 
+## 🛠 Installation & Setup
+
+Follow these steps to get the SAMARTH platform running on your local machine.
+
+### Prerequisites
+- **Node.js**: Version 18.x or higher.
+- **Google Gemini API Key**: You will need an API key to power the "Justice Aide" and automated verification features. Get one at [ai.google.dev](https://ai.google.dev/).
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-repo/samarth-dbt-platform.git
+cd samarth-dbt-platform
+```
+
+### 2. Install Dependencies
+This project uses modern ESM imports. If you are running this in a standard development environment:
+```bash
+npm install
+```
+
+### 3. Environment Configuration
+Create a `.env` file in the root directory and add your Gemini API Key:
+```env
+API_KEY=your_gemini_api_key_here
+```
+
+### 4. Run the Application
+Start the development server:
+```bash
+npm run dev
+# OR if using a simple static server with JSX support:
+npx vite
+```
+The application will be available at `http://localhost:5173`.
+
+---
+
+## 📖 User Guide
+
+### Accessing the Portal
+- **Victim Access (Default):** Use this to file new claims, chat with the Justice Aide, and track active applications.
+- **Official Portal:** Switch roles using the toggle in the navigation bar to access the Administrative Command Center.
+
+### Key Workflows
+1. **Lodge a Claim:** Navigate to the 'Apply' tab, fill in the incident details (including FIR number), and provide bank details.
+2. **AI Scrutiny:** Once a claim is filed, officials can run the "Execute Global Check" which triggers a multi-agency verification (Aadhaar, CCTNS, and AI Semantic Analysis).
+3. **Disbursement:** After verification, the official 'Authorizes Payment', which simulates a PFMS gateway transfer.
+4. **Grievance:** If a payment is delayed, use the 'Support' tab to create a ticket.
+
+---
+
 ## ✨ Key Features
 
 ### 1. Dual-Role Specialized Dashboards
@@ -31,38 +82,26 @@ Automates the verification flow by simulating integration with national database
 - Dedicated ticketing system for beneficiaries to report delays or technical issues.
 - Direct linkage to nodal officers with a simulated 48-hour resolution window.
 
-## 🛠 Tech Stack
-- **Frontend:** React 19 (Hooks, Context), Tailwind CSS (Aesthetic UI/UX).
-- **AI Engine:** Google Gemini API (`@google/genai`).
-- **Analytics:** Recharts (Data visualization).
-- **Icons & Typography:** FontAwesome 6, Inter Font.
-- **Database Simulation:** Mock APIs for Aadhaar, CCTNS, and PFMS integration.
-
 ## 📁 Project Structure
 ```text
 ├── components/
 │   ├── AILegalAssistant.tsx      # Gemini-powered Chatbot
 │   ├── ApplicationForm.tsx       # Dynamic Claim Filing
-│   ├── GrievanceRedressal.tsx    # Support Ticket System
-│   ├── Navigation.tsx            # Context-aware Nav
-│   ├── OfficialDashboard.tsx     # Admin Analytics
+│   ├── OfficialDashboard.tsx     # Admin Analytics (with AI Scrutiny Insights)
 │   ├── VictimDashboard.tsx       # Beneficiary Home
 │   └── ...                       # UI Helpers
 ├── services/
-│   ├── geminiService.ts          # AI Integration Logic
+│   ├── geminiService.ts          # AI Integration Logic (Verification & Guidance)
 │   └── mockApi.ts                # National Database Simulations
 ├── types.ts                      # Global TypeScript Definitions
 ├── App.tsx                       # Main Application Shell
-└── index.html                    # Entry Point
+└── index.html                    # Entry Point with Tailwind & ESM config
 ```
 
 ## 🛡 Security & Privacy
 - **Accurate Identification:** Multi-factor verification via Aadhaar and CCTNS.
 - **Privacy First:** Designed with data isolation and secure identity masking for sensitive victim data.
 - **Transparency:** Immutable record of fund disbursement to prevent misallocation.
-
-## 🌍 Impact
-SAMARTH strengthens public trust in the enforcement framework by ensuring that justice is not just promised, but delivered efficiently. It contributes to a more inclusive, technology-driven welfare delivery system that upholds the dignity of historically marginalized communities.
 
 ---
 *Developed as a prototype for the effective management of DBT under the PCR/PoA Scheme.*
