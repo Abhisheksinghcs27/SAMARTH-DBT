@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Beneficiary, ApplicationStatus } from '../types';
 import AILegalAssistant from './AILegalAssistant';
@@ -12,67 +11,81 @@ const VictimDashboard: React.FC<VictimDashboardProps> = ({ myApplications, onNav
   const activeApp = myApplications[0];
 
   return (
-    <div className="space-y-10 animate-fadeIn">
-      <header className="bg-slate-900 p-12 rounded-[3.5rem] text-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.3)] relative overflow-hidden group">
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+    <div className="space-y-8 animate-fadeIn">
+      {/* Hero Section */}
+      <header className="bg-slate-900 p-10 md:p-14 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
           <div className="max-w-xl">
-            <div className="inline-flex items-center gap-3 bg-indigo-500/20 text-indigo-300 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] mb-6 backdrop-blur-md">
-              <i className="fa-solid fa-lock"></i>
+            <div className="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-300 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] mb-6 backdrop-blur-md border border-indigo-500/20">
+              <i className="fa-solid fa-shield-halved text-[8px]"></i>
               Secure Identity Match
             </div>
-            <h2 className="text-5xl font-black tracking-tighter leading-tight">Welcome, {activeApp?.name || 'Beneficiary'}</h2>
-            <p className="text-slate-400 mt-4 text-lg font-medium leading-relaxed opacity-80">Empowering your rights with transparent digital justice. Your safety and dignity are our priority.</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-[1.1]">Welcome back,<br/> {activeApp?.name || 'Beneficiary'}</h2>
+            <p className="text-slate-400 mt-4 text-base md:text-lg font-medium leading-relaxed opacity-80">Your portal for direct financial relief and legal guidance under the PCR and PoA Acts.</p>
           </div>
-          <button 
-            onClick={() => onNavigate('status')}
-            className="bg-white text-slate-900 px-8 py-4 rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 transition-transform"
-          >
-            Track Case
-          </button>
+          <div className="flex gap-4">
+            <button 
+              onClick={() => onNavigate('apply')}
+              className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all active:scale-95"
+            >
+              New Claim
+            </button>
+            <button 
+              onClick={() => onNavigate('status')}
+              className="bg-white/10 text-white px-8 py-4 rounded-2xl font-bold text-sm uppercase tracking-wider backdrop-blur-md hover:bg-white/20 transition-all active:scale-95 border border-white/10"
+            >
+              Track Progress
+            </button>
+          </div>
         </div>
-        <div className="absolute top-[-50px] right-[-50px] opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">
+        <div className="absolute top-[-50px] right-[-50px] opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-1000">
           <i className="fa-solid fa-scale-balanced text-[20rem] rotate-12"></i>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm relative group hover:border-indigo-200 transition-colors">
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column: Case Updates & Actions */}
+        <div className="lg:col-span-8 space-y-8">
+          <div className="bg-white p-8 md:p-10 rounded-[2rem] border border-slate-200/60 shadow-sm relative group">
             <div className="flex justify-between items-center mb-10">
               <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
-                  <i className="fa-solid fa-hourglass-half animate-spin-slow"></i>
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+                  <i className="fa-solid fa-tower-broadcast text-xs animate-pulse"></i>
                 </div>
-                Live Application Pulse
+                Application Pulse
               </h3>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Auto-Sync Active</span>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Monitoring</span>
+              </div>
             </div>
 
             {activeApp ? (
-              <div className="space-y-8">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50/50 p-6 rounded-3xl border border-slate-100 gap-4">
+              <div className="space-y-10">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50 p-6 rounded-2xl border border-slate-100 gap-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 shadow-sm">
-                      <i className="fa-solid fa-file-shield text-lg"></i>
+                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm border border-slate-100">
+                      <i className="fa-solid fa-file-invoice-dollar text-xl"></i>
                     </div>
                     <div>
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{activeApp.id}</span>
+                      <span className="text-[10px] font-black text-indigo-600/60 uppercase tracking-widest">{activeApp.id}</span>
                       <p className="font-black text-slate-800 text-lg tracking-tight">{activeApp.caseType}</p>
                     </div>
                   </div>
                   <div className="text-left md:text-right">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Projected Relief</p>
-                    <p className="text-2xl font-black text-indigo-600 tracking-tighter">₹{activeApp.amount.toLocaleString()}</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Entitled Relief</p>
+                    <p className="text-3xl font-black text-slate-900 tracking-tighter">₹{activeApp.amount.toLocaleString()}</p>
                   </div>
                 </div>
                 
-                <div className="relative pt-6 px-6">
-                  <div className="flex justify-between mb-6">
-                    {['Draft', 'Checks', 'Final', 'Paid'].map((step, i) => {
+                <div className="relative pt-4 pb-4">
+                  <div className="flex justify-between relative z-10">
+                    {['Draft', 'Checks', 'Sanction', 'Settled'].map((step, i) => {
                       const isDone = i <= (activeApp.status === ApplicationStatus.DISBURSED ? 3 : activeApp.status === ApplicationStatus.SANCTIONED ? 2 : activeApp.status === ApplicationStatus.PENDING ? 0 : 1);
                       return (
                         <div key={step} className="flex flex-col items-center">
-                          <div className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center text-xs font-bold border-2 transition-all duration-1000 ${isDone ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-100' : 'bg-white border-slate-100 text-slate-200'}`}>
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xs font-bold border-2 transition-all duration-700 ${isDone ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-100' : 'bg-white border-slate-200 text-slate-300'}`}>
                             {isDone ? <i className="fa-solid fa-check"></i> : i + 1}
                           </div>
                           <span className={`text-[10px] mt-4 font-black uppercase tracking-[0.1em] ${isDone ? 'text-indigo-600' : 'text-slate-300'}`}>{step}</span>
@@ -80,78 +93,86 @@ const VictimDashboard: React.FC<VictimDashboardProps> = ({ myApplications, onNav
                       );
                     })}
                   </div>
-                  <div className="absolute top-[41px] left-16 right-16 h-1 bg-slate-100 -z-0 rounded-full"></div>
+                  <div className="absolute top-[26px] left-[40px] right-[40px] h-0.5 bg-slate-100 -z-0"></div>
+                  <div 
+                    className="absolute top-[26px] left-[40px] h-0.5 bg-indigo-600 transition-all duration-1000 -z-0"
+                    style={{ width: activeApp.status === ApplicationStatus.DISBURSED ? 'calc(100% - 80px)' : activeApp.status === ApplicationStatus.SANCTIONED ? '66%' : activeApp.status === ApplicationStatus.PENDING ? '0%' : '33%'}}
+                  ></div>
                 </div>
               </div>
             ) : (
-              <div className="text-center py-16">
-                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <i className="fa-solid fa-folder-plus text-slate-200 text-3xl"></i>
+              <div className="text-center py-20">
+                <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-slate-300">
+                  <i className="fa-solid fa-folder-open text-3xl"></i>
                 </div>
-                <p className="font-black text-slate-400 text-lg uppercase tracking-widest">No Active Records</p>
-                <button onClick={() => onNavigate('apply')} className="mt-8 bg-indigo-600 text-white px-10 py-4 rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:scale-105 transition-all">Start Claim Process</button>
+                <p className="font-black text-slate-400 text-lg uppercase tracking-tight">No active applications</p>
+                <button onClick={() => onNavigate('apply')} className="mt-8 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:bg-slate-800">Start Claim Process</button>
               </div>
             )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white group cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/20 transition-all" onClick={() => onNavigate('apply')}>
-              <div className="w-14 h-14 bg-indigo-500 rounded-[1.25rem] flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform shadow-lg shadow-indigo-700/50">
-                <i className="fa-solid fa-file-circle-plus text-2xl"></i>
+            <div className="bg-indigo-600 p-8 rounded-[2rem] text-white group cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-500" onClick={() => onNavigate('apply')}>
+              <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform backdrop-blur-md border border-white/10">
+                <i className="fa-solid fa-plus text-xl"></i>
               </div>
-              <h4 className="text-xl font-black tracking-tight">File New Claim</h4>
-              <p className="text-indigo-200/80 text-sm mt-2 font-medium">Quick 5-step digital application for PCR or PoA Act assistance.</p>
+              <h4 className="text-xl font-black tracking-tight mb-2">New Assistance</h4>
+              <p className="text-indigo-100/70 text-sm font-medium leading-relaxed">Lodge a new claim for relief under PCR or PoA Acts in minutes.</p>
             </div>
-            <div className="bg-white p-8 rounded-[2.5rem] border-2 border-slate-100 group cursor-pointer hover:border-amber-200 transition-all" onClick={() => onNavigate('grievances')}>
-              <div className="w-14 h-14 bg-amber-50 rounded-[1.25rem] flex items-center justify-center mb-6 text-amber-500 group-hover:rotate-[-12deg] transition-transform">
-                <i className="fa-solid fa-headset text-2xl"></i>
+            <div className="bg-white p-8 rounded-[2rem] border border-slate-200 group cursor-pointer hover:border-amber-400/50 transition-all duration-500" onClick={() => onNavigate('grievances')}>
+              <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-6 text-amber-500 group-hover:scale-110 transition-transform border border-amber-100 shadow-sm">
+                <i className="fa-solid fa-comment-dots text-xl"></i>
               </div>
-              <h4 className="text-xl font-black text-slate-800 tracking-tight">Need Assistance?</h4>
-              <p className="text-slate-500 text-sm mt-2 font-medium">Direct line to grievance officers for application delays or issues.</p>
+              <h4 className="text-xl font-black text-slate-800 tracking-tight mb-2">Help Desk</h4>
+              <p className="text-slate-500 text-sm font-medium leading-relaxed">Report delays, site issues, or talk to a nodal officer about your case.</p>
             </div>
           </div>
         </div>
 
-        <div className="lg:col-span-1 space-y-8">
+        {/* Right Column: AI Assistant & Literacy */}
+        <div className="lg:col-span-4 space-y-8">
           <AILegalAssistant />
           
-          <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm">
-            <h3 className="font-black text-slate-800 text-lg mb-8 flex items-center gap-3">
-              <i className="fa-solid fa-shield-halved text-indigo-600"></i>
-              Legal Literacy
+          <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
+            <h3 className="font-black text-slate-800 text-sm mb-6 flex items-center gap-3 uppercase tracking-widest">
+              <i className="fa-solid fa-book-open text-indigo-600"></i>
+              Legal Guide
             </h3>
-            <div className="space-y-6">
-              <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 hover:bg-indigo-50/50 transition-colors">
-                <p className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">PCR Act, 1955</p>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">Protects against untouchability in public places like wells, temples, and schools.</p>
+            <div className="space-y-4">
+              <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 hover:border-indigo-100 transition-colors group">
+                <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-1 group-hover:text-indigo-600 transition-colors">PCR Act, 1955</p>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">Safeguards against discriminatory practices in public spaces.</p>
               </div>
-              <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 hover:bg-indigo-50/50 transition-colors">
-                <p className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">PoA Act, 1989</p>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">Mandatory cash relief within 7 days of FIR for victims of caste-based atrocities.</p>
+              <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 hover:border-indigo-100 transition-colors group">
+                <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-1 group-hover:text-indigo-600 transition-colors">PoA Act, 1989</p>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">Ensures swift relief for victims of caste-based atrocities.</p>
               </div>
-              <button className="w-full text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] pt-2 hover:underline">Explore Full Knowledge Base</button>
+              <button className="w-full text-[10px] font-black text-indigo-600 uppercase tracking-widest pt-2 hover:underline">Knowledge Repository</button>
             </div>
           </div>
 
-          <div className="bg-slate-900 p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
-             <div className="relative z-10">
-               <div className="flex items-center gap-4 mb-8">
-                 <div className="w-12 h-12 bg-indigo-600 rounded-[1rem] flex items-center justify-center text-white shadow-xl shadow-indigo-900/50">
-                   <i className="fa-solid fa-phone-volume text-lg"></i>
-                 </div>
-                 <h3 className="font-black text-lg tracking-tight">Help Desk</h3>
-               </div>
-               <div className="space-y-6">
-                 <div className="flex justify-between items-center bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50">
-                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">National Toll Free</span>
-                   <span className="text-xl font-black text-indigo-400 tracking-tighter">14566</span>
-                 </div>
-                 <div className="flex justify-between items-center bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50">
-                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Police (Atrocity Unit)</span>
-                   <span className="text-xl font-black text-indigo-400 tracking-tighter">112</span>
-                 </div>
-               </div>
-             </div>
+          <div className="bg-slate-900 p-8 rounded-[2rem] text-white shadow-xl relative overflow-hidden">
+            <div className="relative z-10 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-900/50">
+                  <i className="fa-solid fa-phone-volume text-sm"></i>
+                </div>
+                <h3 className="font-black text-sm tracking-tight uppercase tracking-widest">Helplines</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-slate-800">
+                  <span className="text-xs text-slate-400 font-bold uppercase tracking-tight">National Support</span>
+                  <span className="text-lg font-black text-indigo-400 tracking-tighter">14566</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-xs text-slate-400 font-bold uppercase tracking-tight">Women Emergency</span>
+                  <span className="text-lg font-black text-indigo-400 tracking-tighter">1091</span>
+                </div>
+              </div>
+            </div>
+            <div className="absolute bottom-[-20px] left-[-20px] opacity-[0.05]">
+              <i className="fa-solid fa-phone text-8xl"></i>
+            </div>
           </div>
         </div>
       </div>
