@@ -2,10 +2,42 @@ import React from 'react';
 
 const StatsCards: React.FC = () => {
   const stats = [
-    { title: 'Total Beneficiaries', value: '14,208', diff: '+12%', icon: 'fa-users', color: 'indigo' },
-    { title: 'Amount Disbursed', value: '₹42.8 Cr', diff: '+8%', icon: 'fa-indian-rupee-sign', color: 'emerald' },
-    { title: 'Pending Checks', value: '1,124', diff: '-4%', icon: 'fa-clock-rotate-left', color: 'amber' },
-    { title: 'Mean Processing', value: '4.2 Days', diff: '0%', icon: 'fa-bolt-lightning', color: 'rose' },
+    { 
+      title: 'Total Beneficiaries', 
+      value: '15,912', 
+      diff: '+12.3%', 
+      icon: 'fa-users', 
+      color: 'indigo',
+      description: 'Across all schemes',
+      trend: 'up'
+    },
+    { 
+      title: 'Amount Disbursed', 
+      value: '₹233.5 Cr', 
+      diff: '+18.7%', 
+      icon: 'fa-indian-rupee-sign', 
+      color: 'emerald',
+      description: 'FY 2024-25',
+      trend: 'up'
+    },
+    { 
+      title: 'Pending Verifications', 
+      value: '1,124', 
+      diff: '-4.2%', 
+      icon: 'fa-clock-rotate-left', 
+      color: 'amber',
+      description: 'Under review',
+      trend: 'down'
+    },
+    { 
+      title: 'Avg Processing Time', 
+      value: '4.2 Days', 
+      diff: '-0.8 Days', 
+      icon: 'fa-bolt-lightning', 
+      color: 'rose',
+      description: 'From application to disbursement',
+      trend: 'down'
+    },
   ];
 
   const colors: Record<string, string> = {
@@ -23,15 +55,19 @@ const StatsCards: React.FC = () => {
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all group-hover:scale-110 ${colors[stat.color]}`}>
               <i className={`fa-solid ${stat.icon} text-lg`}></i>
             </div>
-            <span className={`text-[10px] font-black px-2 py-1 rounded-lg ${
-              stat.diff.startsWith('+') ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
-            }`}>
-              {stat.diff}
-            </span>
+            <div className="text-right">
+              <span className={`text-[10px] font-black px-2 py-1 rounded-lg block mb-1 ${
+                stat.trend === 'up' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+              }`}>
+                {stat.diff}
+              </span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">vs last month</span>
+            </div>
           </div>
           <div>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{stat.title}</p>
             <h3 className="text-2xl font-black text-slate-900 mt-1 tracking-tighter">{stat.value}</h3>
+            <p className="text-[10px] text-slate-500 font-medium mt-1">{stat.description}</p>
           </div>
         </div>
       ))}

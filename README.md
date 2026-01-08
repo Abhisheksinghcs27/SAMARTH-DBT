@@ -15,8 +15,8 @@ Follow these steps to get the SAMARTH platform running on your local machine.
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-repo/samarth-dbt-platform.git
-cd samarth-dbt-platform
+git clone https://github.com/Abhisheksinghcs27/SAMARTH-DBT.git
+cd SAMARTH-DBT
 ```
 
 ### 2. Install Dependencies
@@ -84,18 +84,28 @@ Automates the verification flow by simulating integration with national database
 
 ## 📁 Project Structure
 ```text
-├── components/
-│   ├── AILegalAssistant.tsx      # Gemini-powered Chatbot
-│   ├── ApplicationForm.tsx       # Dynamic Claim Filing
-│   ├── OfficialDashboard.tsx     # Admin Analytics (with AI Scrutiny Insights)
-│   ├── VictimDashboard.tsx       # Beneficiary Home
-│   └── ...                       # UI Helpers
-├── services/
-│   ├── geminiService.ts          # AI Integration Logic (Verification & Guidance)
-│   └── mockApi.ts                # National Database Simulations
-├── types.ts                      # Global TypeScript Definitions
-├── App.tsx                       # Main Application Shell
-└── index.html                    # Entry Point with Tailwind & ESM config
+├── src/
+│   ├── components/
+│   │   ├── AILegalAssistant.tsx      # Gemini-powered Chatbot
+│   │   ├── ApplicationForm.tsx       # Dynamic Claim Filing
+│   │   ├── GrievanceRedressal.tsx    # Support & Ticketing System
+│   │   ├── Login.tsx                 # Authentication Component
+│   │   ├── Navigation.tsx            # Main Navigation Bar
+│   │   ├── OfficerVerificationView.tsx # Verification Interface
+│   │   ├── OfficialDashboard.tsx     # Admin Analytics (with AI Scrutiny Insights)
+│   │   ├── StatsCards.tsx            # Dashboard Statistics Cards
+│   │   ├── VerificationStepper.tsx   # Case Status Tracker
+│   │   └── VictimDashboard.tsx       # Beneficiary Home
+│   └── services/
+│       ├── geminiService.ts          # AI Integration Logic (Verification & Guidance)
+│       └── mockApi.ts                # National Database Simulations
+├── types.ts                          # Global TypeScript Definitions
+├── App.tsx                           # Main Application Shell
+├── index.tsx                         # React Entry Point
+├── index.html                        # HTML Entry Point with Tailwind & ESM config
+├── index.css                         # Global Styles
+├── vite.config.ts                    # Vite Configuration
+└── package.json                      # Dependencies & Scripts
 ```
 
 ## 🛡 Security & Privacy
