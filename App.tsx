@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import Navigation from './components/Navigation';
-import ApplicationForm from './components/ApplicationForm';
-import VictimDashboard from './components/VictimDashboard';
-import OfficialDashboard from './components/OfficialDashboard';
-import OfficerVerificationView from './components/OfficerVerificationView';
-import GrievanceRedressal from './components/GrievanceRedressal';
+import Navigation from './src/components/Navigation';
+import ApplicationForm from './src/components/ApplicationForm';
+import VictimDashboard from './src/components/VictimDashboard';
+import OfficialDashboard from './src/components/OfficialDashboard';
+import OfficerVerificationView from './src/components/OfficerVerificationView';
+import GrievanceRedressal from './src/components/GrievanceRedressal';
+import Login from './src/components/Login';
 import { Beneficiary, ApplicationStatus, CaseType } from './types';
+import './index.css';
 
 const INITIAL_APPS: Beneficiary[] = [
   { 
@@ -57,6 +59,7 @@ const INITIAL_APPS: Beneficiary[] = [
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<'victim' | 'official'>('victim');
   const [apps, setApps] = useState<Beneficiary[]>(INITIAL_APPS);
   const [notifications, setNotifications] = useState<{id: number, msg: string}[]>([]);
@@ -84,9 +87,19 @@ const App: React.FC = () => {
     addNotification(`Status Change: ${id} is now ${status}`);
   };
 
+  const handleLogin = (role: 'victim' | 'official') => {
+    setUserRole(role);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setActiveTab('dashboard');
+  };
+
   if (isGlobalLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 text-center">
         <div className="relative">
           <div className="w-24 h-24 rounded-[2rem] border-4 border-indigo-500/20 animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center">
@@ -98,24 +111,23 @@ const App: React.FC = () => {
     );
   }
 
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 pb-24 selection:bg-indigo-100 font-sans">
       <Navigation 
         activeTab={activeTab} 
         onTabChange={setActiveTab} 
         userRole={userRole}
-        onRoleSwitch={() => {
-          setIsGlobalLoading(true);
-          setUserRole(prev => prev === 'official' ? 'victim' : 'official');
-          setActiveTab('dashboard');
-          setTimeout(() => setIsGlobalLoading(false), 800);
-        }}
+        onLogout={handleLogout}
       />
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-12">
-        <div className="fixed top-24 right-6 z-[100] flex flex-col gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="fixed top-20 sm:top-24 right-4 sm:right-6 z-[100] flex flex-col gap-4 w-full max-w-sm">
           {notifications.map((n) => (
-            <div key={n.id} className="bg-slate-900/95 backdrop-blur-xl text-white px-8 py-5 rounded-3xl shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] animate-slideInRight flex items-center gap-5 border border-slate-700/50 max-w-sm">
+            <div key={n.id} className="bg-slate-900/95 backdrop-blur-xl text-white px-6 py-4 sm:px-8 sm:py-5 rounded-3xl shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] animate-slideInRight flex items-center gap-4 border border-slate-700/50">
               <div className="bg-indigo-600 w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/30">
                 <i className="fa-solid fa-bell text-sm"></i>
               </div>
@@ -138,23 +150,23 @@ const App: React.FC = () => {
         {activeTab === 'apply' && <ApplicationForm onSubmit={handleApply} />}
 
         {activeTab === 'status' && (
-          <div className="max-w-4xl mx-auto space-y-12">
+          <div className="max-w-4xl mx-auto space-y-8 sm:space-y-12">
             <header className="text-center space-y-4">
               <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-2">
                 <i className="fa-solid fa-tower-broadcast animate-pulse"></i>
                 Live Tracking Active
               </div>
-              <h2 className="text-5xl font-black text-slate-900 tracking-tighter">Your Case Journey</h2>
-              <p className="text-slate-500 font-medium">Transparent, end-to-end monitoring of your relief application.</p>
+              <h2 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter">Your Case Journey</h2>
+              <p className="text-slate-500 font-medium px-4">Transparent, end-to-end monitoring of your relief application.</p>
             </header>
             
             <div className="space-y-8">
               {apps.filter(a => userRole === 'official' || a.name === 'Rajesh Kumar' || a.id.length < 15).map(app => (
-                <div key={app.id} className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-200 hover:border-indigo-300 transition-all hover:shadow-xl hover:shadow-indigo-500/5 group">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
-                    <div className="flex items-center gap-6">
-                      <div className="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center text-slate-300 group-hover:bg-indigo-50 group-hover:text-indigo-400 transition-colors">
-                        <i className="fa-solid fa-folder-open text-2xl"></i>
+                <div key={app.id} className="bg-white p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] shadow-sm border border-slate-200 hover:border-indigo-300 transition-all hover:shadow-xl hover:shadow-indigo-500/5 group">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 sm:mb-10 gap-6">
+                    <div className="flex items-center gap-4 sm:gap-6">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-50 rounded-[1.25rem] sm:rounded-[1.5rem] flex items-center justify-center text-slate-300 group-hover:bg-indigo-50 group-hover:text-indigo-400 transition-colors">
+                        <i className="fa-solid fa-folder-open text-xl sm:text-2xl"></i>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
@@ -162,16 +174,16 @@ const App: React.FC = () => {
                           <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
                           <span className="text-[10px] font-bold text-slate-400 uppercase">FILED {app.appliedDate}</span>
                         </div>
-                        <h3 className="text-2xl font-black text-slate-800 tracking-tight">{app.caseType}</h3>
+                        <h3 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">{app.caseType}</h3>
                       </div>
                     </div>
-                    <div className="bg-slate-50 p-6 rounded-[2rem] text-right shrink-0 border border-slate-100 group-hover:bg-indigo-600 group-hover:border-indigo-500 transition-all">
+                    <div className="bg-slate-50 p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] text-right shrink-0 border border-slate-100 group-hover:bg-indigo-600 group-hover:border-indigo-500 transition-all w-full md:w-auto">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-200">Total Sanction</p>
-                      <p className="text-3xl font-black text-indigo-600 tracking-tighter group-hover:text-white transition-colors">₹{app.amount.toLocaleString()}</p>
+                      <p className="text-2xl sm:text-3xl font-black text-indigo-600 tracking-tighter group-hover:text-white transition-colors">₹{app.amount.toLocaleString()}</p>
                     </div>
                   </div>
                   
-                  <div className="relative pt-8 px-6 pb-2">
+                  <div className="relative pt-8 px-2 sm:px-6 pb-2">
                     <div className="flex justify-between relative z-10">
                       {['Applied', 'Verified', 'Sanctioned', 'Settled'].map((step, idx) => {
                         const isComplete = (idx === 0) || 
@@ -179,28 +191,38 @@ const App: React.FC = () => {
                                          (idx === 2 && [ApplicationStatus.SANCTIONED, ApplicationStatus.DISBURSED].includes(app.status)) ||
                                          (idx === 3 && app.status === ApplicationStatus.DISBURSED);
                         return (
-                          <div key={step} className="flex flex-col items-center">
-                            <div className={`w-14 h-14 rounded-[1.5rem] flex items-center justify-center text-sm font-bold border-2 transition-all duration-700 shadow-sm ${
-                              isComplete ? 'bg-indigo-600 border-indigo-600 text-white rotate-[15deg] scale-110 shadow-xl shadow-indigo-200' : 'bg-white border-slate-100 text-slate-200'
+                          <div key={step} className="flex flex-col items-center w-16 text-center">
+                            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-[1.25rem] sm:rounded-[1.5rem] flex items-center justify-center text-sm font-bold border-2 transition-all duration-700 shadow-sm ${
+                              isComplete ? 'bg-indigo-600 border-indigo-600 text-white rotate-[15deg] scale-110 shadow-xl shadow-indigo-200' : 'bg-white border-slate-100 text-slate-300'
                             }`}>
                               {isComplete ? <i className="fa-solid fa-check"></i> : idx + 1}
                             </div>
-                            <span className={`text-[10px] mt-6 font-black uppercase tracking-[0.1em] ${isComplete ? 'text-indigo-600' : 'text-slate-300'}`}>
+                            <span className={`text-[9px] sm:text-[10px] mt-4 sm:mt-6 font-black uppercase tracking-[0.1em] ${isComplete ? 'text-indigo-600' : 'text-slate-300'}`}>
                               {step}
                             </span>
                           </div>
                         );
                       })}
                     </div>
-                    <div className="absolute top-[36px] left-14 right-14 h-1.5 bg-slate-50 -z-0 rounded-full"></div>
+                    <div className="absolute top-[32px] sm:top-[36px] left-10 right-10 sm:left-14 sm:right-14 h-1.5 bg-slate-50 -z-0 rounded-full"></div>
                     <div 
-                      className="absolute top-[36px] left-14 h-1.5 bg-indigo-600 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] rounded-full shadow-[0_0_15px_rgba(79,70,229,0.3)]" 
-                      style={{ width: app.status === ApplicationStatus.DISBURSED ? 'calc(100% - 112px)' : app.status === ApplicationStatus.SANCTIONED ? '66%' : app.status === ApplicationStatus.PENDING ? '0%' : '33%'}}
+                      className={`absolute top-[32px] sm:top-[36px] left-10 sm:left-14 h-1.5 bg-indigo-600 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] rounded-full shadow-[0_0_15px_rgba(79,70,229,0.3)] ${
+                        app.status === ApplicationStatus.DISBURSED 
+                          ? 'w-[calc(100%-80px)] sm:w-[calc(100%-112px)]' 
+                          : ''
+                      }`}
+                      style={app.status !== ApplicationStatus.DISBURSED ? { 
+                        width: app.status === ApplicationStatus.SANCTIONED 
+                          ? '66%' 
+                          : app.status === ApplicationStatus.PENDING 
+                            ? '0%' 
+                            : '33%'
+                      } : undefined}
                     ></div>
                   </div>
                   
                   {app.status === ApplicationStatus.DISBURSED && (
-                    <div className="mt-12 p-6 bg-emerald-50 rounded-3xl border border-emerald-100 flex items-center justify-between animate-fadeIn">
+                    <div className="mt-12 p-4 sm:p-6 bg-emerald-50 rounded-2xl sm:rounded-3xl border border-emerald-100 flex flex-wrap items-center justify-between gap-4 animate-fadeIn">
                        <div className="flex items-center gap-4">
                          <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm">
                            <i className="fa-solid fa-shield-heart"></i>
@@ -210,7 +232,7 @@ const App: React.FC = () => {
                            <p className="text-xs font-bold text-slate-600">Funds transferred via PFMS gateway on {app.appliedDate}</p>
                          </div>
                        </div>
-                       <button className="text-xs font-black text-emerald-700 uppercase tracking-widest hover:underline">Download Reciept</button>
+                       <button className="text-xs font-black text-emerald-700 uppercase tracking-widest hover:underline ml-auto">Download Reciept</button>
                     </div>
                   )}
                 </div>

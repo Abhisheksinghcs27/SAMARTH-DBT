@@ -2,7 +2,7 @@
 import React from 'react';
 import StatsCards from './StatsCards';
 import AILegalAssistant from './AILegalAssistant';
-import { Beneficiary, ApplicationStatus } from '../types';
+import { Beneficiary, ApplicationStatus } from '../../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 
 const CHART_DATA = [

@@ -1,9 +1,30 @@
 import React, { useState } from 'react';
-import { CaseType, ApplicationStatus } from '../types';
+import { CaseType, ApplicationStatus } from '../../types';
 
 interface ApplicationFormProps {
   onSubmit: (data: any) => void;
 }
+
+interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  icon: string;
+}
+
+const InputField: React.FC<InputFieldProps> = ({ label, icon, ...props }) => (
+  <div className="space-y-2">
+    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1">{label}</label>
+    <div className="relative group">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors">
+        <i className={`fa-solid ${icon} text-xs`}></i>
+      </div>
+      <input
+        {...props}
+        aria-label={label}
+        className="w-full bg-slate-50 border border-slate-200 px-11 py-3.5 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold"
+      />
+    </div>
+  </div>
+);
 
 const ApplicationForm: React.FC<ApplicationFormProps> = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -21,27 +42,17 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ onSubmit }) => {
     e.preventDefault();
     onSubmit({
       ...formData,
-      id: `BT-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+      id: `BT-${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 5)}`,
       status: ApplicationStatus.PENDING,
       appliedDate: new Date().toISOString().split('T')[0],
       amount: formData.caseType === CaseType.INTERCASTE_MARRIAGE ? 250000 : 82500
     });
   };
 
-  const InputField = ({ label, icon, ...props }: any) => (
-    <div className="space-y-2">
-      <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1">{label}</label>
-      <div className="relative group">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors">
-          <i className={`fa-solid ${icon} text-xs`}></i>
-        </div>
-        <input 
-          {...props}
-          className="w-full bg-slate-50 border border-slate-200 px-11 py-3.5 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold"
-        />
-      </div>
-    </div>
-  );
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   return (
     <div className="max-w-4xl mx-auto animate-fadeIn">
@@ -63,24 +74,27 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ onSubmit }) => {
               icon="fa-user-tag" 
               required 
               placeholder="As per Aadhaar"
+              name="name"
               value={formData.name}
-              onChange={(e: any) => setFormData({...formData, name: e.target.value})}
+              onChange={handleChange}
             />
             <InputField 
               label="Aadhaar Number" 
               icon="fa-id-card" 
               required maxLength={12}
               placeholder="12-digit UID"
+              name="aadhaar"
               value={formData.aadhaar}
-              onChange={(e: any) => setFormData({...formData, aadhaar: e.target.value})}
+              onChange={handleChange}
             />
             <InputField 
               label="Contact Number" 
               icon="fa-mobile-screen" 
               required
               placeholder="10-digit primary"
+              name="phone"
               value={formData.phone}
-              onChange={(e: any) => setFormData({...formData, phone: e.target.value})}
+              onChange={handleChange}
             />
             <div className="space-y-2">
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1">Relief Category</label>
@@ -90,8 +104,9 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ onSubmit }) => {
                 </div>
                 <select 
                   className="w-full bg-slate-50 border border-slate-200 pl-11 pr-4 py-3.5 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm font-semibold appearance-none"
+                  name="caseType"
                   value={formData.caseType}
-                  onChange={(e) => setFormData({...formData, caseType: e.target.value as CaseType})}
+                  onChange={handleChange}
                 >
                   <option value={CaseType.POA_ACT}>{CaseType.POA_ACT}</option>
                   <option value={CaseType.PCR_ACT}>{CaseType.PCR_ACT}</option>
@@ -111,8 +126,9 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ onSubmit }) => {
                 label="FIR Reference Number" 
                 icon="fa-building-shield" 
                 placeholder="e.g. RJ/JPR/2024/201"
+                name="firNumber"
                 value={formData.firNumber}
-                onChange={(e: any) => setFormData({...formData, firNumber: e.target.value})}
+                onChange={handleChange}
               />
               <div className="flex items-center gap-4 bg-indigo-50 p-6 rounded-3xl border border-indigo-100">
                 <i className="fa-solid fa-circle-info text-indigo-500 text-xl"></i>
@@ -126,8 +142,9 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ onSubmit }) => {
                 required
                 className="w-full bg-slate-50 border border-slate-200 px-6 py-4 rounded-3xl outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white transition-all text-sm font-medium resize-none"
                 placeholder="Briefly describe the context of the incident for AI Scrutiny..."
+                name="statement"
                 value={formData.statement}
-                onChange={(e) => setFormData({...formData, statement: e.target.value})}
+                onChange={handleChange}
               />
             </div>
           </div>
@@ -139,16 +156,18 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ onSubmit }) => {
                 label="Bank Account Number" 
                 icon="fa-building-columns" 
                 required
+                name="bankAccount"
                 value={formData.bankAccount}
-                onChange={(e: any) => setFormData({...formData, bankAccount: e.target.value})}
+                onChange={handleChange}
               />
               <InputField 
                 label="IFSC Code" 
                 icon="fa-landmark" 
                 required
                 placeholder="e.g. SBIN0001234"
+                name="ifsc"
                 value={formData.ifsc}
-                onChange={(e: any) => setFormData({...formData, ifsc: e.target.value})}
+                onChange={handleChange}
               />
             </div>
           </div>

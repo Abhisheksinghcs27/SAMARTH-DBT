@@ -1,5 +1,5 @@
 import React from 'react';
-import { Beneficiary, ApplicationStatus } from '../types';
+import { Beneficiary, ApplicationStatus } from '../../types';
 import AILegalAssistant from './AILegalAssistant';
 
 interface VictimDashboardProps {
@@ -8,7 +8,11 @@ interface VictimDashboardProps {
 }
 
 const VictimDashboard: React.FC<VictimDashboardProps> = ({ myApplications, onNavigate }) => {
-  const activeApp = myApplications[0];
+  const activeApp = 
+    [...myApplications]
+      .sort((a, b) => new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime())
+      .find(app => app.status !== ApplicationStatus.DISBURSED) 
+    || myApplications[0];
 
   return (
     <div className="space-y-10 animate-fadeIn">

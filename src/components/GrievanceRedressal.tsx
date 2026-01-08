@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Grievance } from '../types';
+import { Grievance } from '../../types';
 
 const GrievanceRedressal: React.FC = () => {
   const [grievances, setGrievances] = useState<Grievance[]>([
@@ -17,7 +17,7 @@ const GrievanceRedressal: React.FC = () => {
     setIsSubmitting(true);
     setTimeout(() => {
       const newG: Grievance = {
-        id: `GR-${Math.floor(Math.random() * 9000) + 1000}`,
+        id: `GR-${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 5)}`,
         beneficiaryId: form.id,
         subject: form.subject,
         description: form.desc,
@@ -49,7 +49,7 @@ const GrievanceRedressal: React.FC = () => {
               value={form.id}
               onChange={e => setForm({...form, id: e.target.value})}
               className="w-full bg-slate-50 border border-slate-200 px-6 py-4 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm font-bold placeholder:text-slate-300" 
-              placeholder="e.g. BT-2024-XXXXX" 
+              placeholder="e.e. BT-2024-XXXXX" 
             />
           </div>
           <div className="space-y-2">

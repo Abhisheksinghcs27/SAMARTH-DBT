@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Beneficiary, ApplicationStatus } from '../types';
+import { Beneficiary, ApplicationStatus } from '../../types';
 import { analyzeCaseForVerification } from '../services/geminiService';
 import { fetchCCTNSData, initiatePFMSTransfer, verifyAadhaar } from '../services/mockApi';
 import VerificationStepper from './VerificationStepper';
