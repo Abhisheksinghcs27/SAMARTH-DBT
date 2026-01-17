@@ -24,7 +24,33 @@ const AILegalAssistant: React.FC = () => {
       const guidance = await getLegalGuidance(userQuery, history);
       setHistory(prev => [...prev, { role: 'ai', text: guidance || 'I am having trouble accessing legal records. Please try again later.' }]);
     } catch (err) {
-      setHistory(prev => [...prev, { role: 'ai', text: 'Connection to JusticeStream AI failed. Please check your internet.' }]);
+      // Log the full error to console for debugging
+      console.error('Justice Aide Error:', err);
+      
+      // Extract real error message
+      let errorMessage = 'An error occurred while processing your request.';
+      if (err instanceof Error) {
+        errorMessage = `Error: ${err.message}`;
+      } else if (typeof err === 'string') {
+        errorMessage = `Error: ${err}`;
+      } else if (err && typeof err === 'object') {
+        // Try to extract meaningful error information
+        const errorObj = err as any;
+        if (errorObj.message) {
+          errorMessage = `Error: ${errorObj.message}`;
+        } else if (errorObj.error) {
+          errorMessage = `Error: ${errorObj.error}`;
+        } else if (errorObj.statusText) {
+          errorMessage = `Error: ${errorObj.statusText}`;
+        } else {
+          errorMessage = `Error: ${JSON.stringify(err)}`;
+        }
+      }
+      
+      setHistory(prev => [...prev, { 
+        role: 'ai', 
+        text: `⚠️ ${errorMessage}\n\nPlease check the browser console for detailed error logs.` 
+      }]);
     } finally {
       setLoading(false);
     }

@@ -41,26 +41,49 @@ export const analyzeCaseForVerification = async (firData: any, victimStatement: 
 };
 
 export const getLegalGuidance = async (query: string, history: {role: 'user' | 'ai', text: string}[]) => {
-  const ai = getAI();
-  const chatHistory = history.map(h => ({
-    role: h.role === 'user' ? 'user' : 'model',
-    parts: [{ text: h.text }]
-  }));
+  try {
+    // Check if API key is configured
+    const apiKey = process.env.GEMINI_API_KEY || '';
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY is not configured. Please set it in your .env file.');
+    }
 
-  const chat = ai.chats.create({
-    model: "gemini-3-flash-preview",
-    history: [
-      {
-        role: 'model',
-        parts: [{ text: `You are 'Justice Aide', a highly specialized legal assistant for the PCR Act 1955 and PoA Act 1989. 
-        Your goal is to help marginalized communities understand their rights to financial relief and the DBT process. 
-        Be compassionate, clear, and cite specific sections of the law when relevant. 
-        Keep responses under 150 words.` }]
-      },
-      ...chatHistory
-    ],
-  });
+    const ai = getAI();
+    const chatHistory = history.map(h => ({
+      role: h.role === 'user' ? 'user' : 'model',
+      parts: [{ text: h.text }]
+    }));
 
-  const response = await chat.sendMessage({ message: query });
-  return response.text || '';
+    const chat = ai.chats.create({
+      model: "gemini-3-flash-preview",
+      history: [
+        {
+          role: 'model',
+          parts: [{ text: `You are 'Justice Aide', a highly specialized legal assistant for the PCR Act 1955 and PoA Act 1989. 
+          Your goal is to help marginalized communities understand their rights to financial relief and the DBT process. 
+          Be compassionate, clear, and cite specific sections of the law when relevant. 
+          Keep responses under 150 words.` }]
+        },
+        ...chatHistory
+      ],
+    });
+
+    const response = await chat.sendMessage({ message: query });
+    
+    if (!response || !response.text) {
+      throw new Error('Empty response received from Gemini API');
+    }
+    
+    return response.text;
+  } catch (error) {
+    // Log the error for debugging
+    console.error('Gemini Service Error:', error);
+    
+    // Re-throw with more context if it's not already an Error
+    if (error instanceof Error) {
+      throw error;
+    } else {
+      throw new Error(`Gemini API Error: ${JSON.stringify(error)}`);
+    }
+  }
 };
