@@ -37,7 +37,7 @@ export const analyzeCaseForVerification = async (firData: any, victimStatement: 
       }
     }
   });
-  return JSON.parse(response.response.text() || '{}');
+  return JSON.parse(response.text || '{}');
 };
 
 export const getLegalGuidance = async (query: string, history: {role: 'user' | 'ai', text: string}[]) => {
@@ -47,14 +47,20 @@ export const getLegalGuidance = async (query: string, history: {role: 'user' | '
     parts: [{ text: h.text }]
   }));
 
-  const chat = ai.models.startChat({
-    history: chatHistory,
-    systemInstruction: `You are 'Justice Aide', a highly specialized legal assistant for the PCR Act 1955 and PoA Act 1989. 
+  const chat = ai.chats.create({
+    model: "gemini-3-flash-preview",
+    history: [
+      {
+        role: 'model',
+        parts: [{ text: `You are 'Justice Aide', a highly specialized legal assistant for the PCR Act 1955 and PoA Act 1989. 
         Your goal is to help marginalized communities understand their rights to financial relief and the DBT process. 
         Be compassionate, clear, and cite specific sections of the law when relevant. 
-        Keep responses under 150 words.`,
+        Keep responses under 150 words.` }]
+      },
+      ...chatHistory
+    ],
   });
 
-  const response = await chat.sendMessage(query);
-  return response.response.text();
+  const response = await chat.sendMessage({ message: query });
+  return response.text || '';
 };
