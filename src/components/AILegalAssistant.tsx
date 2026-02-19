@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getLegalGuidance } from '../services/geminiService';
+import { api } from '../services/api';
 
 const AILegalAssistant: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -21,11 +21,14 @@ const AILegalAssistant: React.FC = () => {
     setLoading(true);
 
     try {
-      const guidance = await getLegalGuidance(userQuery, history);
-      setHistory(prev => [...prev, { role: 'ai', text: guidance || 'I am having trouble accessing legal records. Please try again later.' }]);
+      const result = await api.getLegalGuidance(userQuery, history);
+      setHistory(prev => [...prev, { role: 'ai', text: result.response || 'I am having trouble accessing legal records. Please try again later.' }]);
     } catch (err) {
-      // Log the full error to console for debugging
-      console.error('Justice Aide Error:', err);
+      // Log the full error to console for debugging (only in development)
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Justice Aide Error:', err);
+      }
       
       // Extract real error message
       let errorMessage = 'An error occurred while processing your request.';

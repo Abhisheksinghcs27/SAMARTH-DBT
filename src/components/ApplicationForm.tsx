@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CaseType, ApplicationStatus } from '../../types';
+import { api } from '../services/api';
 
 interface ApplicationFormProps {
   onSubmit: (data: any) => void;
@@ -124,22 +125,34 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ onSubmit }) => {
     declarationAccepted: false
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.declarationAccepted) {
       alert('Please accept the declaration to proceed');
       return;
     }
-    onSubmit({
-      ...formData,
-      id: `BT-${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 5)}`,
-      status: ApplicationStatus.PENDING,
-      appliedDate: new Date().toISOString().split('T')[0],
-      amount: formData.caseType === CaseType.INTERCASTE_MARRIAGE ? 250000 : 82500,
-      annualIncome: formData.annualIncome ? parseFloat(formData.annualIncome) : undefined,
-      familyMembers: formData.familyMembers ? parseInt(formData.familyMembers) : undefined,
-      dependents: formData.dependents ? parseInt(formData.dependents) : undefined
-    });
+
+    setIsSubmitting(true);
+    try {
+      const applicationData = {
+        ...formData,
+        appliedDate: new Date().toISOString().split('T')[0],
+        amount: formData.caseType === CaseType.INTERCASTE_MARRIAGE ? 250000 : 82500,
+        annualIncome: formData.annualIncome ? parseFloat(formData.annualIncome) : undefined,
+        familyMembers: formData.familyMembers ? parseInt(formData.familyMembers) : undefined,
+        dependents: formData.dependents ? parseInt(formData.dependents) : undefined,
+        aadhaar: formData.aadhaar.replace(/-/g, ''),
+      };
+
+      const result = await api.createApplication(applicationData);
+      onSubmit(result.application);
+    } catch (error: any) {
+      alert('Failed to submit application: ' + (error.message || 'Unknown error'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -748,10 +761,20 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ onSubmit }) => {
           <div className="pt-8 flex flex-col sm:flex-row gap-4">
             <button 
               type="submit"
-              className="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black py-5 rounded-3xl hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-xl shadow-indigo-200 uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3"
+              disabled={isSubmitting}
+              className="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black py-5 rounded-3xl hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-xl shadow-indigo-200 uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <i className="fa-solid fa-paper-plane"></i>
-              Submit Application
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <i className="fa-solid fa-paper-plane"></i>
+                  Submit Application
+                </>
+              )}
             </button>
             <button 
               type="reset"

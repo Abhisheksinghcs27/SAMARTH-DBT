@@ -1,8 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Beneficiary, ApplicationStatus, CaseType } from '../../types';
-import { analyzeCaseForVerification } from '../services/geminiService';
-import { fetchCCTNSData, initiatePFMSTransfer, verifyAadhaar } from '../services/mockApi';
+import { api } from '../services/api';
 import VerificationStepper from './VerificationStepper';
 
 interface OfficerVerificationViewProps {
@@ -50,28 +49,45 @@ const OfficerVerificationView: React.FC<OfficerVerificationViewProps> = ({ appli
     
     try {
       updateStep(0, 'loading');
-      const aadhaarOk = await verifyAadhaar(app.aadhaar);
-      if (!aadhaarOk) {
+      const result = await api.verifyApplication(app.id);
+      
+      // Update steps based on verification results
+      if (result.results?.aadhaar?.verified) {
+        updateStep(0, 'success');
+      } else {
         updateStep(0, 'error');
-        throw new Error("Aadhaar Verification Failed");
       }
-      updateStep(0, 'success');
       
-      updateStep(1, 'loading');
-      const cctnsData = await fetchCCTNSData(app.firNumber || '');
-      updateStep(1, 'success');
+      if (result.results?.cctns?.verified) {
+        updateStep(1, 'success');
+      } else {
+        updateStep(1, result.results?.cctns?.error ? 'error' : 'pending');
+      }
       
-      updateStep(2, 'loading');
-      const result = await analyzeCaseForVerification(cctnsData, app.statement || '');
-      setAiAnalysis(result);
-      updateStep(2, 'success');
+      if (result.results?.ai?.verified) {
+        updateStep(2, 'success');
+        setAiAnalysis(result.results.ai.result);
+      } else {
+        updateStep(2, result.results?.ai?.error ? 'error' : 'pending');
+      }
+      
+      if (result.results?.bank?.verified) {
+        updateStep(3, 'success');
+      } else {
+        updateStep(3, result.results?.bank?.error ? 'error' : 'pending');
+      }
 
-      updateStep(3, 'loading');
-      // Bank check simulation
-      await new Promise(r => setTimeout(r, 1000));
-      updateStep(3, 'success');
-    } catch (err: any) {
-      console.error(err);
+      // Refresh application data
+      if (result.application) {
+        onAction(app.id, result.application.status as ApplicationStatus);
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Verification failed:', err);
+      }
+      alert('Verification failed: ' + errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -80,10 +96,17 @@ const OfficerVerificationView: React.FC<OfficerVerificationViewProps> = ({ appli
   const handleDisbursement = async (app: Beneficiary) => {
     setIsProcessing(true);
     try {
-      const response = await initiatePFMSTransfer(app.id, app.amount);
-      setTimeout(() => onAction(app.id, ApplicationStatus.DISBURSED), 1000);
-    } catch (err) {
-      console.error(err);
+      const result = await api.disburseApplication(app.id);
+      if (result.application) {
+        onAction(app.id, ApplicationStatus.DISBURSED);
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Disbursement failed:', err);
+      }
+      alert('Disbursement failed: ' + errorMessage);
     } finally {
       setIsProcessing(false);
     }

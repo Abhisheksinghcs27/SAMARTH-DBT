@@ -9,6 +9,7 @@ import GrievanceRedressal from './src/components/GrievanceRedressal';
 import TrackPage from './src/components/TrackPage';
 import Login from './src/components/Login';
 import { Beneficiary, ApplicationStatus, CaseType } from './types';
+import { api } from './src/services/api';
 import './index.css';
 
 const INITIAL_APPS: Beneficiary[] = [
@@ -62,14 +63,54 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<'victim' | 'official'>('victim');
-  const [apps, setApps] = useState<Beneficiary[]>(INITIAL_APPS);
+  const [apps, setApps] = useState<Beneficiary[]>([]);
   const [notifications, setNotifications] = useState<{id: number, msg: string}[]>([]);
   const [isGlobalLoading, setIsGlobalLoading] = useState(true);
+  const [isLoadingApps, setIsLoadingApps] = useState(false);
 
+  // Check if user is already logged in
   useEffect(() => {
-    const timer = setTimeout(() => setIsGlobalLoading(false), 1200);
-    return () => clearTimeout(timer);
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setUserRole(user.role || 'victim');
+        setIsAuthenticated(true);
+      } catch (e) {
+        api.logout();
+      }
+    }
+    setIsGlobalLoading(false);
   }, []);
+
+  // Load applications when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadApplications();
+    }
+  }, [isAuthenticated]);
+
+  const loadApplications = async () => {
+    try {
+      setIsLoadingApps(true);
+      const result = await api.getApplications();
+      setApps(result.applications || []);
+    } catch (error: unknown) {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to load applications:', error);
+      }
+      // If auth fails, logout
+      const errorMessage = error instanceof Error ? error.message : '';
+      if (errorMessage.includes('401') || errorMessage.includes('token')) {
+        api.logout();
+        setIsAuthenticated(false);
+      }
+    } finally {
+      setIsLoadingApps(false);
+    }
+  };
 
   const addNotification = (msg: string) => {
     const id = Date.now();
@@ -77,15 +118,36 @@ const App: React.FC = () => {
     setTimeout(() => setNotifications(prev => prev.filter(m => m.id !== id)), 5000);
   };
 
-  const handleApply = (newApp: any) => {
-    setApps(prev => [newApp, ...prev]);
-    addNotification("Application Lodged! Ref: " + newApp.id);
-    setActiveTab('status');
+  const handleApply = async (newApp: any) => {
+    try {
+      setApps(prev => [newApp, ...prev]);
+      addNotification("Application Lodged! Ref: " + newApp.id);
+      setActiveTab('status');
+      // Reload applications to get fresh data
+      await loadApplications();
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to handle application:', error);
+      }
+    }
   };
 
-  const handleUpdateStatus = (id: string, status: ApplicationStatus) => {
-    setApps(prev => prev.map(a => a.id === id ? { ...a, status } : a));
-    addNotification(`Status Change: ${id} is now ${status}`);
+  const handleUpdateStatus = async (id: string, status: ApplicationStatus) => {
+    try {
+      await api.updateApplicationStatus(id, status);
+      setApps(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+      addNotification(`Status Change: ${id} is now ${status}`);
+      // Reload applications to get fresh data
+      await loadApplications();
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to update status:', error);
+      }
+      alert('Failed to update status: ' + errorMessage);
+    }
   };
 
   const handleLogin = (role: 'victim' | 'official') => {
@@ -94,8 +156,10 @@ const App: React.FC = () => {
   };
 
   const handleLogout = () => {
+    api.logout();
     setIsAuthenticated(false);
     setActiveTab('dashboard');
+    setApps([]);
   };
 
   if (isGlobalLoading) {
@@ -137,31 +201,42 @@ const App: React.FC = () => {
           ))}
         </div>
 
-        {activeTab === 'dashboard' && (
-          userRole === 'victim' ? (
-            <VictimDashboard 
-              myApplications={apps.filter(a => a.name === 'Rajesh Kumar' || a.id.startsWith('BT-'))} 
-              onNavigate={setActiveTab} 
-            />
-          ) : (
-            <OfficialDashboard apps={apps} onNavigate={setActiveTab} />
-          )
-        )}
+        {isLoadingApps ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-slate-500 font-bold">Loading applications...</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {activeTab === 'dashboard' && (
+              userRole === 'victim' ? (
+                <VictimDashboard 
+                  myApplications={apps} 
+                  onNavigate={setActiveTab} 
+                />
+              ) : (
+                <OfficialDashboard apps={apps} onNavigate={setActiveTab} />
+              )
+            )}
 
-        {activeTab === 'apply' && <ApplicationForm onSubmit={handleApply} />}
+            {activeTab === 'apply' && <ApplicationForm onSubmit={handleApply} />}
 
-        {activeTab === 'status' && (
-          <TrackPage 
-            applications={userRole === 'official' ? apps : apps.filter(a => a.name === 'Rajesh Kumar' || a.id.startsWith('BT-'))}
-            userRole={userRole}
-          />
-        )}
+            {activeTab === 'status' && (
+              <TrackPage 
+                applications={apps}
+                userRole={userRole}
+              />
+            )}
 
-        {activeTab === 'verifications' && (
-          <OfficerVerificationView 
-            applications={apps.filter(a => [ApplicationStatus.PENDING, ApplicationStatus.SANCTIONED].includes(a.status))} 
-            onAction={handleUpdateStatus} 
-          />
+            {activeTab === 'verifications' && (
+              <OfficerVerificationView 
+                applications={apps.filter(a => [ApplicationStatus.PENDING, ApplicationStatus.SANCTIONED].includes(a.status))} 
+                onAction={handleUpdateStatus} 
+              />
+            )}
+          </>
         )}
 
         {activeTab === 'grievances' && <GrievanceRedressal />}

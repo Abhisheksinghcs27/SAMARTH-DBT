@@ -39,7 +39,10 @@ const OfficialDashboard: React.FC<OfficialDashboardProps> = ({ apps, onNavigate 
   
   const flaggedCount = verifiedApps.filter(a => a.aiVerification?.score && a.aiVerification.score < 60).length;
   const criticalRemarks = verifiedApps
-    .filter(a => a.aiVerification?.remarks.toLowerCase().includes('flagged') || (a.aiVerification?.score || 100) < 60)
+    .filter(a => {
+      const remarks = a.aiVerification?.remarks?.toLowerCase() || '';
+      return remarks.includes('flagged') || (a.aiVerification?.score || 100) < 60;
+    })
     .slice(0, 3);
 
   // Calculate scheme-wise statistics
@@ -269,9 +272,9 @@ const OfficialDashboard: React.FC<OfficialDashboardProps> = ({ apps, onNavigate 
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: any, name: string, props: any) => [
-                  `${value}% (${props.payload.amount})`,
-                  name
+                <Tooltip formatter={(value: any, name?: string, props?: any) => [
+                  `${value}% (${props?.payload?.amount ?? ''})`,
+                  name ?? ''
                 ]} />
               </PieChart>
             </ResponsiveContainer>

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Beneficiary, ApplicationStatus, TrackingData, TimelineEvent } from '../../types';
-import { fetchCCTNSData } from '../services/mockApi';
+import { api } from '../services/api';
 
 interface TrackPageProps {
   applications: Beneficiary[];
@@ -15,157 +15,36 @@ const TrackPage: React.FC<TrackPageProps> = ({ applications, userRole }) => {
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'ALL'>('ALL');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Generate tracking data for applications
+  // Load tracking data for applications
   useEffect(() => {
-    const generateTrackingData = async () => {
+    const loadTrackingData = async () => {
       setIsLoading(true);
       const newTrackingData = new Map<string, TrackingData>();
 
       for (const app of applications) {
-        const events: TimelineEvent[] = [];
-        const appliedDate = new Date(app.appliedDate);
-        
-        // Application submitted
-        events.push({
-          id: `${app.id}-1`,
-          timestamp: app.appliedDate,
-          type: 'application_submitted',
-          title: 'Application Submitted',
-          description: `Application ${app.id} has been successfully submitted for ${app.caseType}`,
-          metadata: { caseType: app.caseType, amount: app.amount }
-        });
-
-        // Status-based events
-        if (app.status !== ApplicationStatus.PENDING) {
-          const verifyDate = new Date(appliedDate);
-          verifyDate.setDate(verifyDate.getDate() + 2);
-          
-          events.push({
-            id: `${app.id}-2`,
-            timestamp: verifyDate.toISOString().split('T')[0],
-            type: 'verification_started',
-            title: 'Verification Process Initiated',
-            description: 'Your application has been assigned to the verification team',
-            officerName: 'System Automated',
-            officerId: 'SYS-001'
-          });
-
-          events.push({
-            id: `${app.id}-3`,
-            timestamp: verifyDate.toISOString().split('T')[0],
-            type: 'aadhaar_verified',
-            title: 'Aadhaar Verification Complete',
-            description: `Aadhaar number ${app.aadhaar.slice(0, 4)}-XXXX-XXXX verified successfully`,
-            officerName: 'UIDAI Gateway',
-            officerId: 'UIDAI-AUTO'
-          });
-
-          if (app.firNumber) {
-            const cctnsDate = new Date(verifyDate);
-            cctnsDate.setDate(cctnsDate.getDate() + 1);
-            
-            try {
-              const cctnsData = await fetchCCTNSData(app.firNumber);
-              events.push({
-                id: `${app.id}-4`,
-                timestamp: cctnsDate.toISOString().split('T')[0],
-                type: 'cctns_verified',
-                title: 'CCTNS FIR Verification Complete',
-                description: `FIR ${app.firNumber} verified. Sections: ${cctnsData?.sections?.join(', ') || 'N/A'}`,
-                officerName: 'CCTNS System',
-                officerId: 'CCTNS-AUTO',
-                metadata: { firData: cctnsData }
-              });
-            } catch (e) {
-              // Silent fail for demo
-            }
+        try {
+          const result = await api.getTracking(app.id);
+          if (result.tracking) {
+            newTrackingData.set(app.id, result.tracking);
           }
-
-          if (app.aiVerification) {
-            const aiDate = new Date(verifyDate);
-            aiDate.setDate(aiDate.getDate() + 1);
-            
-            events.push({
-              id: `${app.id}-5`,
-              timestamp: aiDate.toISOString().split('T')[0],
-              type: 'ai_verified',
-              title: 'AI Verification Complete',
-              description: app.aiVerification.remarks,
-              officerName: 'AI Verification Engine',
-              officerId: 'AI-VERIFY',
-              metadata: { 
-                score: app.aiVerification.score,
-                matchedFields: app.aiVerification.matchedFields
-              }
-            });
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            // eslint-disable-next-line no-console
+            console.error(`Failed to load tracking for ${app.id}:`, error);
           }
+          // Silently fail in production - tracking data will be unavailable
         }
-
-        if (app.status === ApplicationStatus.SANCTIONED || app.status === ApplicationStatus.DISBURSED) {
-          const sanctionDate = new Date(appliedDate);
-          sanctionDate.setDate(sanctionDate.getDate() + 5);
-          
-          events.push({
-            id: `${app.id}-6`,
-            timestamp: sanctionDate.toISOString().split('T')[0],
-            type: 'sanctioned',
-            title: 'Payment Sanctioned',
-            description: `Amount of ₹${app.amount.toLocaleString()} has been sanctioned for disbursement`,
-            officerName: 'Sanctioning Authority',
-            officerId: 'SA-001'
-          });
-        }
-
-        if (app.status === ApplicationStatus.DISBURSED) {
-          const disburseDate = new Date(appliedDate);
-          disburseDate.setDate(disburseDate.getDate() + 7);
-          
-          events.push({
-            id: `${app.id}-7`,
-            timestamp: disburseDate.toISOString().split('T')[0],
-            type: 'disbursed',
-            title: 'Payment Disbursed',
-            description: `Funds have been transferred to your bank account via PFMS gateway`,
-            officerName: 'PFMS System',
-            officerId: 'PFMS-AUTO',
-            metadata: {
-              utrNumber: `PFMS${Math.floor(Math.random() * 1000000000)}`,
-              transactionDate: disburseDate.toISOString().split('T')[0]
-            }
-          });
-        }
-
-        // Sort events by timestamp
-        events.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-
-        const estimatedDate = new Date(appliedDate);
-        estimatedDate.setDate(estimatedDate.getDate() + (app.status === ApplicationStatus.DISBURSED ? 7 : 10));
-
-        newTrackingData.set(app.id, {
-          applicationId: app.id,
-          events,
-          currentStatus: app.status,
-          estimatedCompletionDate: app.status !== ApplicationStatus.DISBURSED ? estimatedDate.toISOString().split('T')[0] : undefined,
-          assignedOfficer: app.status !== ApplicationStatus.PENDING ? {
-            name: 'Officer Name',
-            id: 'OFF-001',
-            department: 'Verification Department'
-          } : undefined,
-          paymentDetails: app.status === ApplicationStatus.DISBURSED ? {
-            utrNumber: events.find(e => e.type === 'disbursed')?.metadata?.utrNumber,
-            transactionDate: events.find(e => e.type === 'disbursed')?.timestamp,
-            bankName: 'Bank Name',
-            accountNumber: app.bankAccount,
-            ifsc: app.ifsc
-          } : undefined
-        });
       }
 
       setTrackingData(newTrackingData);
       setIsLoading(false);
     };
 
-    generateTrackingData();
+    if (applications.length > 0) {
+      loadTrackingData();
+    } else {
+      setIsLoading(false);
+    }
   }, [applications]);
 
   const filteredApps = useMemo(() => {

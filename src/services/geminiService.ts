@@ -76,8 +76,11 @@ export const getLegalGuidance = async (query: string, history: {role: 'user' | '
     
     return response.text;
   } catch (error) {
-    // Log the error for debugging
-    console.error('Gemini Service Error:', error);
+    // Log the error for debugging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('Gemini Service Error:', error);
+    }
     
     // Re-throw with more context if it's not already an Error
     if (error instanceof Error) {

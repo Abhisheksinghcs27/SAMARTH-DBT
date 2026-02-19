@@ -1,33 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grievance } from '../../types';
+import { api } from '../services/api';
 
 const GrievanceRedressal: React.FC = () => {
-  const [grievances, setGrievances] = useState<Grievance[]>([
-    { id: 'GR-1024', beneficiaryId: 'BT-001', subject: 'Delay in DBT Disbursement', status: 'In-Progress', createdAt: '2024-05-10', description: 'Application sanctioned 5 days ago but amount not received.' },
-    { id: 'GR-1011', beneficiaryId: 'BT-003', subject: 'Aadhaar Verification Failed', status: 'Resolved', createdAt: '2024-05-02', description: 'System kept showing Aadhaar mismatch.' },
-  ]);
-
+  const [grievances, setGrievances] = useState<Grievance[]>([]);
   const [form, setForm] = useState({ id: '', subject: '', desc: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    loadGrievances();
+  }, []);
+
+  const loadGrievances = async () => {
+    try {
+      setIsLoading(true);
+      const result = await api.getGrievances();
+      setGrievances(result.grievances || []);
+    } catch (error: unknown) {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to load grievances:', error);
+      }
+      // Silently fail in production - grievances list will be empty
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.id || !form.subject) return;
+    if (!form.id || !form.subject || !form.desc) {
+      alert('Please fill all required fields');
+      return;
+    }
     
     setIsSubmitting(true);
-    setTimeout(() => {
-      const newG: Grievance = {
-        id: `GR-${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 5)}`,
+    try {
+      const result = await api.createGrievance({
         beneficiaryId: form.id,
         subject: form.subject,
         description: form.desc,
-        status: 'Open',
-        createdAt: new Date().toISOString().split('T')[0]
-      };
-      setGrievances(prev => [newG, ...prev]);
+      });
+      setGrievances(prev => [result.grievance, ...prev]);
       setForm({ id: '', subject: '', desc: '' });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert('Failed to submit grievance: ' + errorMessage);
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -114,12 +136,17 @@ const GrievanceRedressal: React.FC = () => {
               </div>
             </div>
           ))}
-          {grievances.length === 0 && (
+          {isLoading ? (
+            <div className="text-center py-20">
+              <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-slate-400 font-bold">Loading grievances...</p>
+            </div>
+          ) : grievances.length === 0 ? (
             <div className="text-center py-20 bg-slate-50 rounded-[3rem] border-4 border-dashed border-slate-100">
                <i className="fa-solid fa-check-double text-slate-200 text-4xl mb-4"></i>
                <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No active complaints</p>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

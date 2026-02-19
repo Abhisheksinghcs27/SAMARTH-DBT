@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { api } from '../services/api';
 
 interface LoginProps {
   onLogin: (role: 'victim' | 'official') => void;
@@ -20,36 +21,44 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setError('');
     setIsLoading(true);
 
-    // Validation
-    if (selectedRole === 'victim') {
-      if (!aadhaar || !/^\d{12}$/.test(aadhaar.replace(/-/g, ''))) {
-        setError('Please enter a valid 12-digit Aadhaar number');
-        setIsLoading(false);
-        return;
-      }
-      if (!beneficiaryPassword || beneficiaryPassword.length < 6) {
-        setError('Password must be at least 6 characters');
-        setIsLoading(false);
-        return;
-      }
-    } else {
-      if (!officialId || officialId.trim().length < 3) {
-        setError('Please enter your official ID');
-        setIsLoading(false);
-        return;
-      }
-      if (!password || password.length < 6) {
-        setError('Password must be at least 6 characters');
-        setIsLoading(false);
-        return;
-      }
-    }
+    try {
+      // Validation
+      if (selectedRole === 'victim') {
+        if (!aadhaar || !/^\d{12}$/.test(aadhaar.replace(/-/g, ''))) {
+          setError('Please enter a valid 12-digit Aadhaar number');
+          setIsLoading(false);
+          return;
+        }
+        if (!beneficiaryPassword || beneficiaryPassword.length < 6) {
+          setError('Password must be at least 6 characters');
+          setIsLoading(false);
+          return;
+        }
 
-    // Simulate authentication delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsLoading(false);
-    onLogin(selectedRole);
+        // Call backend API
+        await api.loginVictim(aadhaar.replace(/-/g, ''), beneficiaryPassword);
+        onLogin(selectedRole);
+      } else {
+        if (!officialId || officialId.trim().length < 3) {
+          setError('Please enter your official ID');
+          setIsLoading(false);
+          return;
+        }
+        if (!password || password.length < 6) {
+          setError('Password must be at least 6 characters');
+          setIsLoading(false);
+          return;
+        }
+
+        // Call backend API
+        await api.loginOfficial(officialId, password);
+        onLogin(selectedRole);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatAadhaar = (value: string) => {

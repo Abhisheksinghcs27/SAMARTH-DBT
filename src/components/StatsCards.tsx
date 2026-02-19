@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { api } from '../services/api';
 
 const StatsCards: React.FC = () => {
-  const stats = [
+  const [stats, setStats] = useState([
     { 
       title: 'Total Beneficiaries', 
-      value: '15,912', 
-      diff: '+12.3%', 
+      value: '0', 
+      diff: '+0%', 
       icon: 'fa-users', 
       color: 'indigo',
       description: 'Across all schemes',
@@ -13,8 +14,8 @@ const StatsCards: React.FC = () => {
     },
     { 
       title: 'Amount Disbursed', 
-      value: '₹233.5 Cr', 
-      diff: '+18.7%', 
+      value: '₹0', 
+      diff: '+0%', 
       icon: 'fa-indian-rupee-sign', 
       color: 'emerald',
       description: 'FY 2024-25',
@@ -22,23 +23,83 @@ const StatsCards: React.FC = () => {
     },
     { 
       title: 'Pending Verifications', 
-      value: '1,124', 
-      diff: '-4.2%', 
+      value: '0', 
+      diff: '-0%', 
       icon: 'fa-clock-rotate-left', 
       color: 'amber',
       description: 'Under review',
       trend: 'down'
     },
     { 
-      title: 'Avg Processing Time', 
-      value: '4.2 Days', 
-      diff: '-0.8 Days', 
-      icon: 'fa-bolt-lightning', 
+      title: 'Sanctioned', 
+      value: '0', 
+      diff: '+0%', 
+      icon: 'fa-check-circle', 
       color: 'rose',
-      description: 'From application to disbursement',
-      trend: 'down'
+      description: 'Ready for disbursement',
+      trend: 'up'
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const result = await api.getApplicationStats();
+        if (result) {
+          const totalDisbursed = result.totalDisbursed || 0;
+          const disbursedInCr = (totalDisbursed / 10000000).toFixed(1);
+          
+          setStats([
+            { 
+              title: 'Total Beneficiaries', 
+              value: result.total?.toLocaleString() || '0', 
+              diff: '+0%', 
+              icon: 'fa-users', 
+              color: 'indigo',
+              description: 'Across all schemes',
+              trend: 'up'
+            },
+            { 
+              title: 'Amount Disbursed', 
+              value: `₹${disbursedInCr} Cr`, 
+              diff: '+0%', 
+              icon: 'fa-indian-rupee-sign', 
+              color: 'emerald',
+              description: 'FY 2024-25',
+              trend: 'up'
+            },
+            { 
+              title: 'Pending Verifications', 
+              value: result.pending?.toLocaleString() || '0', 
+              diff: '-0%', 
+              icon: 'fa-clock-rotate-left', 
+              color: 'amber',
+              description: 'Under review',
+              trend: 'down'
+            },
+            { 
+              title: 'Sanctioned', 
+              value: result.sanctioned?.toLocaleString() || '0', 
+              diff: '+0%', 
+              icon: 'fa-check-circle', 
+              color: 'rose',
+              description: 'Ready for disbursement',
+              trend: 'up'
+            },
+          ]);
+        }
+      } catch (error) {
+        // Only log in development
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.error('Failed to load stats:', error);
+        }
+        // Silently fail in production - stats will show default values
+      }
+    };
+
+    loadStats();
+  }, []);
 
   const colors: Record<string, string> = {
     indigo: 'bg-indigo-50 text-indigo-600 border-indigo-100',
