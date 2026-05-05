@@ -32,7 +32,7 @@ const corsOptions = {
   origin: env.CORS_ORIGIN 
     ? env.CORS_ORIGIN.split(',').map(origin => origin.trim())
     : env.NODE_ENV === 'production'
-      ? [] // Must be explicitly set in production
+      ? ['https://samarth-dbt.onrender.com'] // Allowed in production if not explicitly set
       : ['http://localhost:3000', 'http://localhost:5173'],
   credentials: true,
   optionsSuccessStatus: 200,
